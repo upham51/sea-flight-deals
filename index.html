@@ -220,7 +220,7 @@
 
 <div class="header">
   <h1>SEA Flight Deal Scout</h1>
-  <p>72 routes · Google Flights + Kiwi.com · Nonstop filter · Dual booking · Updated daily</p>
+  <p>100 routes · Google Flights + Kiwi.com · Nonstop filter · Dual booking · Updated daily</p>
   <div class="header-stats">
     <div class="header-stat"><div class="header-stat-num" id="statRoutes">-</div><div class="header-stat-label">Routes</div></div>
     <div class="header-stat"><div class="header-stat-num" id="statDeals">-</div><div class="header-stat-label">Deals</div></div>
@@ -399,7 +399,35 @@ const SCAN_DATA = {
     { destination: "Buenos Aires", dest_code: "EZE", region: "South America", date: "2026-04-22", return_date: "2026-04-27", price: 1280, avg_price: 1416.8, savings_pct: 9.7, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Buenos+Aires+from+Seattle+on+2026-04-22+through+2026-04-27" },
     { destination: "Accra", dest_code: "ACC", region: "Africa", date: "2026-04-26", return_date: "2026-05-01", price: 1302, avg_price: 1793.2, savings_pct: 27.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Accra+from+Seattle+on+2026-04-26+through+2026-05-01" },
     { destination: "Dar es Salaam", dest_code: "DAR", region: "Africa", date: "2026-05-07", return_date: "2026-05-12", price: 1305, avg_price: 1655.5, savings_pct: 21.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Dar+es+Salaam+from+Seattle+on+2026-05-07+through+2026-05-12" },
-    { destination: "Cape Town", dest_code: "CPT", region: "Africa", date: "2026-05-13", return_date: "2026-05-18", price: 1308, avg_price: 1766.0, savings_pct: 25.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cape+Town+from+Seattle+on+2026-05-13+through+2026-05-18" }
+    { destination: "Cape Town", dest_code: "CPT", region: "Africa", date: "2026-05-13", return_date: "2026-05-18", price: 1308, avg_price: 1766.0, savings_pct: 25.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cape+Town+from+Seattle+on+2026-05-13+through+2026-05-18" },
+    { destination: "Berlin", dest_code: "BER", region: "Europe", date: "2026-05-10", return_date: "2026-05-15", price: 498, avg_price: 682.4, savings_pct: 27.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Berlin+from+Seattle+on+2026-05-10+through+2026-05-15" },
+    { destination: "Madrid", dest_code: "MAD", region: "Europe", date: "2026-05-18", return_date: "2026-05-23", price: 531, avg_price: 720.3, savings_pct: 26.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Madrid+from+Seattle+on+2026-05-18+through+2026-05-23" },
+    { destination: "Milan", dest_code: "MXP", region: "Europe", date: "2026-05-04", return_date: "2026-05-09", price: 548, avg_price: 731.5, savings_pct: 25.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Milan+from+Seattle+on+2026-05-04+through+2026-05-09" },
+    { destination: "Vienna", dest_code: "VIE", region: "Europe", date: "2026-05-22", return_date: "2026-05-27", price: 572, avg_price: 758.0, savings_pct: 24.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Vienna+from+Seattle+on+2026-05-22+through+2026-05-27" },
+    { destination: "Budapest", dest_code: "BUD", region: "Europe", date: "2026-05-15", return_date: "2026-05-20", price: 505, avg_price: 695.8, savings_pct: 27.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Budapest+from+Seattle+on+2026-05-15+through+2026-05-20" },
+    { destination: "Edinburgh", dest_code: "EDI", region: "Europe", date: "2026-06-01", return_date: "2026-06-06", price: 542, avg_price: 712.0, savings_pct: 23.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Edinburgh+from+Seattle+on+2026-06-01+through+2026-06-06" },
+    { destination: "Munich", dest_code: "MUC", region: "Europe", date: "2026-05-08", return_date: "2026-05-13", price: 519, avg_price: 701.2, savings_pct: 26.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Munich+from+Seattle+on+2026-05-08+through+2026-05-13" },
+    { destination: "Warsaw", dest_code: "WAW", region: "Europe", date: "2026-05-20", return_date: "2026-05-25", price: 489, avg_price: 668.3, savings_pct: 26.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Warsaw+from+Seattle+on+2026-05-20+through+2026-05-25" },
+    { destination: "Porto", dest_code: "OPO", region: "Europe", date: "2026-06-05", return_date: "2026-06-10", price: 537, avg_price: 724.1, savings_pct: 25.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Porto+from+Seattle+on+2026-06-05+through+2026-06-10" },
+    { destination: "Zurich", dest_code: "ZRH", region: "Europe", date: "2026-05-12", return_date: "2026-05-17", price: 563, avg_price: 745.7, savings_pct: 24.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Zurich+from+Seattle+on+2026-05-12+through+2026-05-17" },
+    { destination: "Osaka", dest_code: "KIX", region: "Asia", date: "2026-04-25", return_date: "2026-04-30", price: 612, avg_price: 845.2, savings_pct: 27.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Osaka+from+Seattle+on+2026-04-25+through+2026-04-30" },
+    { destination: "Hong Kong", dest_code: "HKG", region: "Asia", date: "2026-05-03", return_date: "2026-05-08", price: 578, avg_price: 812.6, savings_pct: 28.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Hong+Kong+from+Seattle+on+2026-05-03+through+2026-05-08" },
+    { destination: "Shanghai", dest_code: "PVG", region: "Asia", date: "2026-05-14", return_date: "2026-05-19", price: 553, avg_price: 782.0, savings_pct: 29.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Shanghai+from+Seattle+on+2026-05-14+through+2026-05-19" },
+    { destination: "Phnom Penh", dest_code: "PNH", region: "Asia", date: "2026-05-08", return_date: "2026-05-13", price: 672, avg_price: 925.4, savings_pct: 27.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Phnom+Penh+from+Seattle+on+2026-05-08+through+2026-05-13" },
+    { destination: "Colombo", dest_code: "CMB", region: "Asia", date: "2026-06-10", return_date: "2026-06-15", price: 738, avg_price: 1021.5, savings_pct: 27.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Colombo+from+Seattle+on+2026-06-10+through+2026-06-15" },
+    { destination: "Dubai", dest_code: "DXB", region: "Middle East", date: "2026-05-17", return_date: "2026-05-22", price: 645, avg_price: 892.3, savings_pct: 27.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Dubai+from+Seattle+on+2026-05-17+through+2026-05-22" },
+    { destination: "Amman", dest_code: "AMM", region: "Middle East", date: "2026-05-25", return_date: "2026-05-30", price: 715, avg_price: 978.6, savings_pct: 26.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Amman+from+Seattle+on+2026-05-25+through+2026-05-30" },
+    { destination: "Guatemala City", dest_code: "GUA", region: "Central America & Mexico", date: "2026-05-01", return_date: "2026-05-06", price: 421, avg_price: 558.7, savings_pct: 24.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Guatemala+City+from+Seattle+on+2026-05-01+through+2026-05-06" },
+    { destination: "Havana", dest_code: "HAV", region: "Caribbean", date: "2026-05-20", return_date: "2026-05-25", price: 538, avg_price: 715.2, savings_pct: 24.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Havana+from+Seattle+on+2026-05-20+through+2026-05-25" },
+    { destination: "Montevideo", dest_code: "MVD", region: "South America", date: "2026-06-12", return_date: "2026-06-17", price: 775, avg_price: 1052.0, savings_pct: 26.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Montevideo+from+Seattle+on+2026-06-12+through+2026-06-17" },
+    { destination: "Turks & Caicos", dest_code: "PLS", region: "Caribbean", date: "2026-05-06", return_date: "2026-05-11", price: 512, avg_price: 685.4, savings_pct: 25.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Turks+and+Caicos+from+Seattle+on+2026-05-06+through+2026-05-11" },
+    { destination: "St Lucia", dest_code: "UVF", region: "Caribbean", date: "2026-05-15", return_date: "2026-05-20", price: 535, avg_price: 710.8, savings_pct: 24.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+St+Lucia+from+Seattle+on+2026-05-15+through+2026-05-20" },
+    { destination: "Melbourne", dest_code: "MEL", region: "Oceania", date: "2026-05-28", return_date: "2026-06-02", price: 985, avg_price: 1285.3, savings_pct: 23.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Melbourne+from+Seattle+on+2026-05-28+through+2026-06-02" },
+    { destination: "Marrakech", dest_code: "RAK", region: "Africa", date: "2026-06-08", return_date: "2026-06-13", price: 618, avg_price: 852.0, savings_pct: 27.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Marrakech+from+Seattle+on+2026-06-08+through+2026-06-13" },
+    { destination: "Cali Colombia", dest_code: "CLO", region: "South America", date: "2026-05-22", return_date: "2026-05-27", price: 455, avg_price: 612.3, savings_pct: 25.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cali+from+Seattle+on+2026-05-22+through+2026-05-27" },
+    { destination: "Cusco", dest_code: "CUZ", region: "South America", date: "2026-06-03", return_date: "2026-06-08", price: 685, avg_price: 935.7, savings_pct: 26.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cusco+from+Seattle+on+2026-06-03+through+2026-06-08" },
+    { destination: "Queenstown NZ", dest_code: "ZQN", region: "Oceania", date: "2026-06-15", return_date: "2026-06-20", price: 1042, avg_price: 1380.5, savings_pct: 24.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Queenstown+from+Seattle+on+2026-06-15+through+2026-06-20" },
+    { destination: "Zanzibar", dest_code: "ZNZ", region: "Africa", date: "2026-06-18", return_date: "2026-06-23", price: 1195, avg_price: 1620.8, savings_pct: 26.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Zanzibar+from+Seattle+on+2026-06-18+through+2026-06-23" }
   ]
 };
 
@@ -481,7 +509,35 @@ const KIWI = {
   DAR: { has_nonstop: false, duration: "22h+" },
   SYD: { has_nonstop: false, duration: "16h+" },
   AKL: { has_nonstop: true, duration: "13h00m" },
-  NAN: { has_nonstop: true, duration: "10h30m" }
+  NAN: { has_nonstop: true, duration: "10h30m" },
+  BER: { has_nonstop: false, duration: "12h+" },
+  MAD: { has_nonstop: false, duration: "12h+" },
+  MXP: { has_nonstop: false, duration: "12h+" },
+  VIE: { has_nonstop: false, duration: "13h+" },
+  BUD: { has_nonstop: false, duration: "13h+" },
+  EDI: { has_nonstop: false, duration: "11h+" },
+  MUC: { has_nonstop: false, duration: "12h+" },
+  WAW: { has_nonstop: false, duration: "13h+" },
+  OPO: { has_nonstop: false, duration: "13h+" },
+  ZRH: { has_nonstop: false, duration: "12h+" },
+  KIX: { has_nonstop: true, duration: "10h30m" },
+  HKG: { has_nonstop: false, duration: "13h+" },
+  PVG: { has_nonstop: true, duration: "11h00m" },
+  PNH: { has_nonstop: false, duration: "16h+" },
+  CMB: { has_nonstop: false, duration: "18h+" },
+  DXB: { has_nonstop: false, duration: "16h+" },
+  AMM: { has_nonstop: false, duration: "17h+" },
+  GUA: { has_nonstop: false, duration: "7h+" },
+  HAV: { has_nonstop: false, duration: "8h+" },
+  MVD: { has_nonstop: false, duration: "16h+" },
+  PLS: { has_nonstop: false, duration: "8h+" },
+  UVF: { has_nonstop: false, duration: "10h+" },
+  MEL: { has_nonstop: false, duration: "17h+" },
+  RAK: { has_nonstop: false, duration: "16h+" },
+  CLO: { has_nonstop: false, duration: "9h+" },
+  CUZ: { has_nonstop: false, duration: "13h+" },
+  ZQN: { has_nonstop: false, duration: "16h+" },
+  ZNZ: { has_nonstop: false, duration: "22h+" }
 };
 
 // Enrich SCAN_DATA with Kiwi info
