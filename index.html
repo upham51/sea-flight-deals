@@ -554,8 +554,8 @@ SCAN_DATA.results.forEach(r => {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const regionEmoji = {"Asia":"🌏","Europe":"🌍","Caribbean":"🏖️","South America":"🌎","Central America & Mexico":"🇲🇽","Africa":"🌍","Oceania":"🏝️","North America":"🇺🇸"};
-const REGIONS = ["All","Asia","Europe","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
+const regionEmoji = {"Asia":"🌏","Europe":"🌍","Caribbean":"🏖️","South America":"🌎","Central America & Mexico":"🇲🇽","Africa":"🌍","Oceania":"🏝️","North America":"🇺🇸","Middle East":"🕌"};
+const REGIONS = ["All","Asia","Europe","Middle East","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
 
 function fmtDate(iso) {
   const d = new Date(iso + "T00:00:00");
@@ -595,7 +595,7 @@ function init() {
 
 function renderContinentSummary() {
   const grid = document.getElementById("continentGrid");
-  const continents = ["Asia","Europe","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
+  const continents = ["Asia","Europe","Middle East","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
   grid.innerHTML = continents.map(c => {
     const cr = SCAN_DATA.results.filter(r => r.region === c).sort((a,b) => a.price - b.price);
     if (!cr.length) return "";
@@ -751,8 +751,10 @@ function populateDestDropdowns() {
   const in2w = new Date(now.getTime() + 14 * 86400000);
   const in4m = new Date(now.getTime() + 120 * 86400000);
   const fmt = d => d.toISOString().split("T")[0];
-  document.getElementById("drFrom").value = fmt(in2w);
-  document.getElementById("drTo").value = fmt(in4m);
+  const drFrom = document.getElementById("drFrom") || document.getElementById("toFrom");
+  const drTo = document.getElementById("drTo") || document.getElementById("toTo");
+  if (drFrom) drFrom.value = fmt(in2w);
+  if (drTo) drTo.value = fmt(in4m);
   document.getElementById("mcFrom").value = fmt(in2w);
   document.getElementById("mcTo").value = fmt(in4m);
 }
