@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEA Flight Deal Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #ffffff;
+    --border: #e2e8f0;
+    --border-hover: #c7d2fe;
+    --text: #0f172a;
+    --text-dim: #475569;
+    --text-muted: #94a3b8;
+    --accent: #4f46e5;
+    --accent-light: #6366f1;
+    --green: #059669;
+    --green-light: #10b981;
+    --red: #e11d48;
+    --amber: #d97706;
+    --blue: #2563eb;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow-sm: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.06);
+    --shadow: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+    --shadow-lg: 0 12px 40px rgba(15,23,42,0.1), 0 4px 12px rgba(15,23,42,0.05);
+    --shadow-glow: 0 0 0 3px rgba(99,102,241,0.1), 0 4px 20px rgba(99,102,241,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+  a:hover { color: #4338ca; text-decoration: none; }
+
+  /* ─── Animated Header ──────────────────────────────────────────────── */
+  .header {
+    position: relative; overflow: hidden; color: white; padding: 52px 24px 44px; text-align: center;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 35%, #4338ca 65%, #6366f1 100%);
+  }
+  .header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255,255,255,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 100%, rgba(16,185,129,0.12) 0%, transparent 50%);
+    animation: aurora 8s ease-in-out infinite alternate;
+  }
+  @keyframes aurora { 0% { opacity: 0.7; transform: scale(1); } 100% { opacity: 1; transform: scale(1.03); } }
+  .header::after {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header * { position: relative; z-index: 1; }
+  .header h1 { font-size: 38px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 10px; text-shadow: 0 2px 20px rgba(0,0,0,0.15); }
+  .header p { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; letter-spacing: 0.5px; }
+  .header-stats { display: flex; justify-content: center; gap: 48px; margin-top: 32px; }
+  .header-stat { text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 14px 24px; }
+  .header-stat-num { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+  .header-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); font-weight: 600; margin-top: 2px; }
+
+  /* ─── Layout ──────────────────────────────────────────────────────── */
+  .container { max-width: 960px; margin: 0 auto; padding: 36px 20px; }
+  .section { margin-bottom: 36px; animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.2px; }
+
+  /* ─── Filters ──────────────────────────────────────────────────────── */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; align-items: center; }
+  .filter-btn { padding: 8px 18px; border-radius: 24px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-dim); }
+  .filter-btn:hover { border-color: var(--border-hover); color: var(--text); box-shadow: var(--shadow-sm); }
+  .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 12px rgba(79,70,229,0.25); }
+  .sort-select { margin-left: auto; padding: 8px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: white; color: var(--text-dim); font-weight: 500; cursor: pointer; font-family: inherit; }
+
+  /* ─── Continent Cards ──────────────────────────────────────────────── */
+  .continent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+  .continent-card { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; transition: all 0.25s; box-shadow: var(--shadow-sm); }
+  .continent-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-glow); transform: translateY(-3px); }
+  .continent-left { display: flex; align-items: center; gap: 12px; }
+  .continent-emoji { font-size: 28px; }
+  .continent-name { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .continent-dest { font-size: 15px; font-weight: 700; color: var(--text); }
+  .continent-price { font-size: 24px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }
+  .continent-dates { font-size: 10px; color: var(--text-muted); }
+
+  /* ─── Flight Cards ─────────────────────────────────────────────────── */
+  .flight-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; transition: all 0.25s; box-shadow: var(--shadow-sm); }
+  .flight-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .flight-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; cursor: pointer; }
+  .flight-left { display: flex; align-items: center; gap: 14px; }
+  .flight-emoji { font-size: 30px; }
+  .flight-dest { font-weight: 700; font-size: 16px; color: var(--text); letter-spacing: -0.3px; }
+  .flight-code { font-size: 11px; color: var(--text-muted); margin-left: 6px; font-weight: 500; }
+  .flight-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  .flight-right { text-align: right; display: flex; align-items: center; gap: 14px; }
+  .flight-price { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+  .flight-savings { font-size: 11px; font-weight: 700; }
+  .flight-savings.hot { color: var(--red); }
+  .flight-savings.deal { color: var(--amber); }
+  .flight-savings.normal { color: var(--text-muted); }
+  .flight-avg { font-size: 11px; color: var(--text-muted); text-decoration: line-through; }
+  .flight-chevron { font-size: 14px; color: var(--text-muted); transition: transform 0.25s; }
+  .flight-chevron.open { transform: rotate(180deg); }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; vertical-align: middle; letter-spacing: 0.3px; }
+  .badge-hot { background: #fef2f2; color: var(--red); }
+  .badge-deal { background: #fffbeb; color: var(--amber); }
+  .badge-positioning { background: #fffbeb; color: #b45309; }
+  .badge-nonstop { background: #ecfdf5; color: var(--green); }
+  .badge-duration { background: #eff6ff; color: var(--blue); font-weight: 600; }
+
+  /* ─── Expanded ─────────────────────────────────────────────────────── */
+  .flight-expanded { display: none; padding: 0 22px 22px; }
+  .flight-expanded.show { display: block; animation: fadeUp 0.3s ease; }
+  .book-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; background: var(--accent); color: white; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; transition: all 0.2s; letter-spacing: 0.2px; box-shadow: 0 2px 8px rgba(79,70,229,0.2); }
+  .book-btn:hover { background: #4338ca; box-shadow: 0 4px 16px rgba(79,70,229,0.3); transform: translateY(-1px); text-decoration: none; }
+  .book-btn-kiwi { background: #0891b2; box-shadow: 0 2px 8px rgba(8,145,178,0.2); }
+  .book-btn-kiwi:hover { background: #0e7490; box-shadow: 0 4px 16px rgba(8,145,178,0.3); text-decoration: none; }
+  .nonstop-toggle { padding: 8px 18px; border-radius: 24px; border: 1.5px solid #d1fae5; background: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--green); }
+  .nonstop-toggle:hover { background: #ecfdf5; border-color: #a7f3d0; }
+  .nonstop-toggle.active { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 2px 12px rgba(5,150,105,0.25); }
+  .flight-duration { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--blue); background: #eff6ff; padding: 2px 8px; border-radius: 8px; margin-left: 6px; font-weight: 600; }
+  .flight-nonstop { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--green); background: #ecfdf5; padding: 2px 8px; border-radius: 8px; margin-left: 4px; font-weight: 700; }
+  .positioning-info { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fef3c7; color: #92400e; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; margin-left: 8px; }
+  .chart-container { margin-top: 12px; background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; }
+  .chart-placeholder { text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px; }
+
+  /* ─── Savings Chart ────────────────────────────────────────────────── */
+  .savings-chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); }
+  .savings-bar { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+  .savings-label { font-size: 12px; color: var(--text-dim); width: 130px; text-align: right; flex-shrink: 0; font-weight: 600; }
+  .savings-track { flex: 1; height: 30px; background: #f1f5f9; border-radius: 10px; overflow: hidden; position: relative; }
+  .savings-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; color: white; font-weight: 700; min-width: 40px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .savings-fill.hot { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+  .savings-fill.deal { background: linear-gradient(90deg, #f59e0b, #d97706); }
+  .savings-fill.ok { background: linear-gradient(90deg, #6366f1, #4f46e5); }
+
+  /* ─── Tool Cards ───────────────────────────────────────────────────── */
+  .tool-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
+  .tool-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: var(--text); letter-spacing: -0.5px; }
+  .tool-card .tool-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.6; }
+  .tool-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: end; }
+  .tool-field { display: flex; flex-direction: column; gap: 6px; }
+  .tool-field label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .tool-field input, .tool-field select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; background: white; color: var(--text); font-family: inherit; transition: all 0.2s; }
+  .tool-field input:focus, .tool-field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+  .tool-btn { padding: 10px 24px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; align-self: end; transition: all 0.2s; font-family: inherit; letter-spacing: 0.2px; box-shadow: 0 2px 8px rgba(79,70,229,0.2); }
+  .tool-btn:hover { background: #4338ca; box-shadow: 0 4px 16px rgba(79,70,229,0.3); transform: translateY(-1px); }
+  .tool-btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; transform: none; }
+  .tool-results { margin-top: 14px; }
+  .tool-result-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }
+  .tool-result-item:last-child { border-bottom: none; }
+  .tool-result-item a { color: var(--accent); font-weight: 600; }
+  .tool-result-price { font-size: 20px; font-weight: 800; color: var(--green); }
+  .tool-result-date { font-size: 12px; color: var(--text-dim); }
+  .tool-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e2e8f0; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .mc-city-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .mc-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #eef2ff; color: var(--accent); border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .mc-tag button { background: none; border: none; color: #a5b4fc; cursor: pointer; font-size: 14px; padding: 0 2px; transition: color 0.2s; }
+  .mc-tag button:hover { color: var(--red); }
+  .mc-itinerary { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 20px; margin-top: 14px; }
+  .mc-itinerary h4 { font-size: 16px; font-weight: 800; color: var(--green); margin-bottom: 10px; }
+  .mc-leg { padding: 8px 0; border-bottom: 1px dashed #d1fae5; }
+  .mc-leg:last-child { border-bottom: none; }
+
+  /* ─── Time Off ─────────────────────────────────────────────────────── */
+  .timeoff-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 36px; }
+  .timeoff-tag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: #eef2ff; color: var(--accent); border-radius: 24px; font-size: 13px; font-weight: 700; }
+  .timeoff-tag button { background: none; border: none; color: #a5b4fc; cursor: pointer; font-size: 14px; padding: 0 2px; transition: color 0.2s; }
+  .timeoff-tag button:hover { color: var(--red); }
+  .timeoff-result-block { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 22px; margin-bottom: 14px; }
+  .timeoff-result-block h4 { font-size: 15px; font-weight: 800; color: var(--green); margin-bottom: 12px; }
+  .timeoff-dest { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+  .timeoff-dest:last-child { border-bottom: none; }
+  .timeoff-dest-left { display: flex; align-items: center; gap: 10px; }
+  .timeoff-dest-emoji { font-size: 22px; }
+  .timeoff-dest-name { font-weight: 700; font-size: 15px; color: var(--text); }
+  .timeoff-dest-meta { font-size: 11px; color: var(--text-dim); }
+  .timeoff-dest-price { font-size: 24px; font-weight: 800; color: var(--green); letter-spacing: -0.5px; }
+  .timeoff-dest-savings { font-size: 11px; font-weight: 700; color: var(--red); }
+  .timeoff-no-results { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; }
+
+  /* ─── Signup ───────────────────────────────────────────────────────── */
+  .signup-card { background: linear-gradient(135deg, #312e81 0%, #4338ca 50%, #6366f1 100%); border-radius: var(--radius); padding: 40px 28px; color: white; text-align: center; box-shadow: 0 8px 32px rgba(67,56,202,0.25); }
+  .signup-card h3 { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .signup-card p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 24px; line-height: 1.5; }
+  .signup-form { display: flex; gap: 10px; max-width: 500px; margin: 0 auto; }
+  .signup-input { flex: 1; padding: 13px 18px; border: 2px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); color: white; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s; }
+  .signup-input::placeholder { color: rgba(255,255,255,0.4); }
+  .signup-input:focus { border-color: rgba(255,255,255,0.5); }
+  .signup-btn { padding: 13px 28px; background: white; color: var(--accent); border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s; }
+  .signup-btn:hover { background: #eef2ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .signup-success { display: none; font-size: 15px; font-weight: 700; }
+  .signup-success.show { display: block; }
+  .signup-form.hidden { display: none; }
+
+  /* ─── Footer ───────────────────────────────────────────────────────── */
+  .footer-note { text-align: center; font-size: 11px; color: var(--text-muted); padding: 32px 0 16px; }
+  .footer-note a { color: var(--text-dim); }
+
+  @media (max-width: 600px) {
+    .signup-form { flex-direction: column; }
+    .header { padding: 36px 16px 28px; }
+    .header h1 { font-size: 26px; }
+    .header-stats { gap: 12px; flex-wrap: wrap; }
+    .header-stat { padding: 10px 16px; }
+    .header-stat-num { font-size: 22px; }
+    .continent-grid { grid-template-columns: 1fr; }
+    .flight-row { padding: 14px; }
+    .flight-dest { font-size: 14px; }
+    .flight-price { font-size: 20px; }
+    .filters { gap: 6px; }
+    .container { padding: 20px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SEA Flight Deal Scout</h1>
+  <p>72 routes · Google Flights + Kiwi.com · Nonstop filter · Dual booking · Updated daily</p>
+  <div class="header-stats">
+    <div class="header-stat"><div class="header-stat-num" id="statRoutes">-</div><div class="header-stat-label">Routes</div></div>
+    <div class="header-stat"><div class="header-stat-num" id="statDeals">-</div><div class="header-stat-label">Deals</div></div>
+    <div class="header-stat"><div class="header-stat-num" id="statCheapest">-</div><div class="header-stat-label">Cheapest</div></div>
+    <div class="header-stat"><div class="header-stat-num" id="statNonstop">-</div><div class="header-stat-label">Nonstop</div></div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Continent Summary -->
+  <div class="section">
+    <div class="section-title">🌍 Cheapest Round-Trip Per Continent</div>
+    <div class="continent-grid" id="continentGrid"></div>
+  </div>
+
+  <!-- Top Savings Chart -->
+  <div class="section">
+    <div class="section-title">📉 Biggest Savings vs. Route Average</div>
+    <div class="savings-chart-container" id="savingsChart"></div>
+  </div>
+
+  <!-- Time Off Deals -->
+  <div class="section">
+    <div class="section-title">🏖️ My Time Off — Cheapest Places to Fly</div>
+    <div class="tool-card">
+      <h3>Add your days off, see the cheapest destinations</h3>
+      <p class="tool-desc">Enter your time-off dates and we'll rank every destination by price for each window.</p>
+      <div class="tool-row">
+        <div class="tool-field">
+          <label>Start Date</label>
+          <input type="date" id="toFrom">
+        </div>
+        <div class="tool-field">
+          <label>End Date</label>
+          <input type="date" id="toTo">
+        </div>
+        <button class="tool-btn" onclick="addTimeOff()" style="background:#059669;">+ Add Time Off</button>
+      </div>
+      <div class="timeoff-tags" id="toTags"></div>
+      <button class="tool-btn" id="toSearchBtn" onclick="searchTimeOff()" style="width:100%;text-align:center;">Find Cheapest Destinations</button>
+      <div class="tool-results" id="toResults"></div>
+    </div>
+  </div>
+
+  <!-- Multi-City Planner -->
+  <div class="section">
+    <div class="section-title">🌍 Multi-City Trip Planner</div>
+    <div class="tool-card">
+      <h3>Chain 3 one-way flights for less</h3>
+      <p class="tool-desc">Pick 2 cities — we'll find the cheapest way to route SEA → City A → City B → SEA using one-way tickets. Tries all orderings.</p>
+      <div class="tool-row">
+        <div class="tool-field">
+          <label>Add City</label>
+          <select id="mcDest"></select>
+        </div>
+        <button class="tool-btn" onclick="addMcCity()" style="background:#059669;">+ Add</button>
+      </div>
+      <div class="mc-city-tags" id="mcTags"></div>
+      <div class="tool-row">
+        <div class="tool-field">
+          <label>Travel Window From</label>
+          <input type="date" id="mcFrom">
+        </div>
+        <div class="tool-field">
+          <label>To</label>
+          <input type="date" id="mcTo">
+        </div>
+        <div class="tool-field">
+          <label>Days/Stop</label>
+          <input type="number" id="mcDays" value="3" min="2" max="14" style="width:60px;">
+        </div>
+        <button class="tool-btn" id="mcSearchBtn" onclick="searchMultiCity()">Find Cheapest Route</button>
+      </div>
+      <div class="tool-results" id="mcResults"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" id="filters"></div>
+
+  <!-- Flight Cards -->
+  <div id="flightCards"></div>
+
+  <!-- Email Signup -->
+  <div class="section">
+    <div class="signup-card">
+      <h3>✈️ Get These Deals in Your Inbox</h3>
+      <p>Daily digest every morning at 7am — cheapest fares, price drops, and positioning flight hacks from SEA.</p>
+      <div class="signup-form" id="signupForm">
+        <input type="text" class="signup-input" id="signupName" placeholder="Your name">
+        <input type="email" class="signup-input" id="signupEmail" placeholder="you@email.com">
+        <button class="signup-btn" onclick="handleSignup()">Subscribe</button>
+      </div>
+      <div class="signup-success" id="signupSuccess">✅ Email opened! Just hit send, and you'll get your first digest tomorrow at 7am.</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Powered by <a href="https://github.com/punitarani/fli" target="_blank">fli</a> (Google Flights) + <a href="https://www.kiwi.com" target="_blank">Kiwi.com</a> · Nonstop data, durations & booking links · Updated daily · Home: SEA
+  </div>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const SCAN_DATA = {
+  scan_date: "2026-04-01 05:54",
+  results: [
+    { destination: "Los Angeles", dest_code: "LAX", region: "North America", date: "2026-04-27", return_date: "2026-05-02", price: 77, avg_price: 173.5, savings_pct: 55.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Los+Angeles+from+Seattle+on+2026-04-27+through+2026-05-02" },
+    { destination: "San Diego", dest_code: "SAN", region: "North America", date: "2026-05-08", return_date: "2026-05-13", price: 169, avg_price: 229.1, savings_pct: 26.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+San+Diego+from+Seattle+on+2026-05-08+through+2026-05-13" },
+    { destination: "Chicago", dest_code: "ORD", region: "North America", date: "2026-04-23", return_date: "2026-04-28", price: 185, avg_price: 269.1, savings_pct: 31.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Chicago+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Kauai (Lihue)", dest_code: "LIH", region: "North America", date: "2026-05-14", return_date: "2026-05-19", price: 265, avg_price: 506.0, savings_pct: 47.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Kauai+(Lihue)+from+Seattle+on+2026-05-14+through+2026-05-19" },
+    { destination: "Big Island (Kona)", dest_code: "KOA", region: "North America", date: "2026-04-23", return_date: "2026-04-28", price: 265, avg_price: 512.1, savings_pct: 48.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Big+Island+(Kona)+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Oahu (Honolulu)", dest_code: "HNL", region: "North America", date: "2026-04-22", return_date: "2026-04-27", price: 292, avg_price: 497.1, savings_pct: 41.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Oahu+(Honolulu)+from+Seattle+on+2026-04-22+through+2026-04-27" },
+    { destination: "Maui (Kahului)", dest_code: "OGG", region: "North America", date: "2026-04-23", return_date: "2026-04-28", price: 307, avg_price: 518.9, savings_pct: 40.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Maui+(Kahului)+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Cancun", dest_code: "CUN", region: "Caribbean", date: "2026-05-08", return_date: "2026-05-13", price: 325, avg_price: 426.7, savings_pct: 23.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cancun+from+Seattle+on+2026-05-08+through+2026-05-13" },
+    { destination: "Fairbanks", dest_code: "FAI", region: "North America", date: "2026-04-22", return_date: "2026-04-27", price: 339, avg_price: 449.7, savings_pct: 24.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Fairbanks+from+Seattle+on+2026-04-22+through+2026-04-27" },
+    { destination: "Mexico City", dest_code: "MEX", region: "Central America & Mexico", date: "2026-06-03", return_date: "2026-06-08", price: 345, avg_price: 460.0, savings_pct: 25.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Mexico+City+from+Seattle+on+2026-06-03+through+2026-06-08" },
+    { destination: "Puerto Vallarta", dest_code: "PVR", region: "Central America & Mexico", date: "2026-04-25", return_date: "2026-04-30", price: 347, avg_price: 454.1, savings_pct: 23.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Puerto+Vallarta+from+Seattle+on+2026-04-25+through+2026-04-30" },
+    { destination: "Cabo San Lucas", dest_code: "SJD", region: "Central America & Mexico", date: "2026-04-19", return_date: "2026-04-24", price: 388, avg_price: 477.3, savings_pct: 18.7, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Cabo+San+Lucas+from+Seattle+on+2026-04-19+through+2026-04-24" },
+    { destination: "Guadalajara", dest_code: "GDL", region: "Central America & Mexico", date: "2026-06-27", return_date: "2026-07-02", price: 409, avg_price: 480.7, savings_pct: 14.9, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Guadalajara+from+Seattle+on+2026-06-27+through+2026-07-02" },
+    { destination: "Panama City", dest_code: "PTY", region: "Central America & Mexico", date: "2026-06-04", return_date: "2026-06-09", price: 413, avg_price: 606.9, savings_pct: 31.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Panama+City+from+Seattle+on+2026-06-04+through+2026-06-09" },
+    { destination: "Trinidad", dest_code: "POS", region: "Caribbean", date: "2026-04-24", return_date: "2026-04-29", price: 414, avg_price: 495.4, savings_pct: 16.4, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Trinidad+from+Seattle+on+2026-04-24+through+2026-04-29" },
+    { destination: "St Thomas USVI", dest_code: "STT", region: "Caribbean", date: "2026-04-15", return_date: "2026-04-20", price: 420, avg_price: 556.2, savings_pct: 24.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+St+Thomas+USVI+from+Seattle+on+2026-04-15+through+2026-04-20" },
+    { destination: "San Jose CR", dest_code: "SJO", region: "Central America & Mexico", date: "2026-04-30", return_date: "2026-05-05", price: 424, avg_price: 534.2, savings_pct: 20.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+San+Jose+CR+from+Seattle+on+2026-04-30+through+2026-05-05" },
+    { destination: "San Juan Puerto Rico", dest_code: "SJU", region: "Caribbean", date: "2026-05-02", return_date: "2026-05-07", price: 434, avg_price: 504.9, savings_pct: 14.0, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+San+Juan+Puerto+Rico+from+Seattle+on+2026-05-02+through+2026-05-07" },
+    { destination: "Reykjavik Iceland", dest_code: "KEF", region: "Europe", date: "2026-04-18", return_date: "2026-04-23", price: 449, avg_price: 558.7, savings_pct: 19.6, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Reykjavik+Iceland+from+Seattle+on+2026-04-18+through+2026-04-23" },
+    { destination: "Copenhagen", dest_code: "CPH", region: "Europe", date: "2026-04-15", return_date: "2026-04-20", price: 469, avg_price: 680.6, savings_pct: 31.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Copenhagen+from+Seattle+on+2026-04-15+through+2026-04-20" },
+    { destination: "Nassau Bahamas", dest_code: "NAS", region: "Caribbean", date: "2026-04-27", return_date: "2026-05-02", price: 486, avg_price: 567.4, savings_pct: 14.3, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Nassau+Bahamas+from+Seattle+on+2026-04-27+through+2026-05-02" },
+    { destination: "Grand Cayman", dest_code: "GCM", region: "Caribbean", date: "2026-06-10", return_date: "2026-06-15", price: 493, avg_price: 684.5, savings_pct: 28.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Grand+Cayman+from+Seattle+on+2026-06-10+through+2026-06-15" },
+    { destination: "Liberia Costa Rica", dest_code: "LIR", region: "Central America & Mexico", date: "2026-06-08", return_date: "2026-06-13", price: 493, avg_price: 640.3, savings_pct: 23.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Liberia+Costa+Rica+from+Seattle+on+2026-06-08+through+2026-06-13" },
+    { destination: "Montego Bay Jamaica", dest_code: "MBJ", region: "Caribbean", date: "2026-04-23", return_date: "2026-04-28", price: 494, avg_price: 552.3, savings_pct: 10.6, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Montego+Bay+Jamaica+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Belize City", dest_code: "BZE", region: "Central America & Mexico", date: "2026-05-05", return_date: "2026-05-10", price: 498, avg_price: 599.7, savings_pct: 17.0, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Belize+City+from+Seattle+on+2026-05-05+through+2026-05-10" },
+    { destination: "Santo Domingo", dest_code: "SDQ", region: "Caribbean", date: "2026-04-23", return_date: "2026-04-28", price: 512, avg_price: 579.7, savings_pct: 11.7, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Santo+Domingo+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Curacao", dest_code: "CUR", region: "Caribbean", date: "2026-06-06", return_date: "2026-06-11", price: 531, avg_price: 749.4, savings_pct: 29.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Curacao+from+Seattle+on+2026-06-06+through+2026-06-11" },
+    { destination: "Medellin", dest_code: "MDE", region: "South America", date: "2026-04-17", return_date: "2026-04-22", price: 537, avg_price: 646.6, savings_pct: 16.9, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Medellin+from+Seattle+on+2026-04-17+through+2026-04-22" },
+    { destination: "Barbados", dest_code: "BGI", region: "Caribbean", date: "2026-06-01", return_date: "2026-06-06", price: 547, avg_price: 760.5, savings_pct: 28.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Barbados+from+Seattle+on+2026-06-01+through+2026-06-06" },
+    { destination: "Punta Cana", dest_code: "PUJ", region: "Caribbean", date: "2026-04-18", return_date: "2026-04-23", price: 553, avg_price: 616.8, savings_pct: 10.3, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Punta+Cana+from+Seattle+on+2026-04-18+through+2026-04-23" },
+    { destination: "Aruba", dest_code: "AUA", region: "Caribbean", date: "2026-04-15", return_date: "2026-04-20", price: 561, avg_price: 617.9, savings_pct: 9.2, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Aruba+from+Seattle+on+2026-04-15+through+2026-04-20" },
+    { destination: "Bogota", dest_code: "BOG", region: "South America", date: "2026-04-23", return_date: "2026-04-28", price: 581, avg_price: 663.4, savings_pct: 12.4, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Bogota+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Prague", dest_code: "PRG", region: "Europe", date: "2026-04-19", return_date: "2026-04-24", price: 590, avg_price: 910.8, savings_pct: 35.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Prague+from+Seattle+on+2026-04-19+through+2026-04-24" },
+    { destination: "Paris", dest_code: "CDG", region: "Europe", date: "2026-04-19", return_date: "2026-04-24", price: 640, avg_price: 1063.8, savings_pct: 39.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Paris+from+Seattle+on+2026-04-19+through+2026-04-24" },
+    { destination: "Singapore", dest_code: "SIN", region: "Asia", date: "2026-05-02", return_date: "2026-05-07", price: 642, avg_price: 1169.9, savings_pct: 45.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Singapore+from+Seattle+on+2026-05-02+through+2026-05-07" },
+    { destination: "Cartagena", dest_code: "CTG", region: "South America", date: "2026-04-20", return_date: "2026-04-25", price: 672, avg_price: 749.4, savings_pct: 10.3, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Cartagena+from+Seattle+on+2026-04-20+through+2026-04-25" },
+    { destination: "Barcelona", dest_code: "BCN", region: "Europe", date: "2026-05-18", return_date: "2026-05-23", price: 683, avg_price: 1036.8, savings_pct: 34.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Barcelona+from+Seattle+on+2026-05-18+through+2026-05-23" },
+    { destination: "Cairo", dest_code: "CAI", region: "Africa", date: "2026-04-26", return_date: "2026-05-01", price: 700, avg_price: 954.5, savings_pct: 26.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cairo+from+Seattle+on+2026-04-26+through+2026-05-01" },
+    { destination: "Lisbon", dest_code: "LIS", region: "Europe", date: "2026-04-29", return_date: "2026-05-04", price: 705, avg_price: 1078.3, savings_pct: 34.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Lisbon+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Quito", dest_code: "UIO", region: "South America", date: "2026-05-07", return_date: "2026-05-12", price: 709, avg_price: 860.2, savings_pct: 17.6, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Quito+from+Seattle+on+2026-05-07+through+2026-05-12" },
+    { destination: "Casablanca", dest_code: "CMN", region: "Africa", date: "2026-04-29", return_date: "2026-05-04", price: 709, avg_price: 1091.8, savings_pct: 35.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Casablanca+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Roatan Honduras", dest_code: "RTB", region: "Central America & Mexico", date: "2026-05-02", return_date: "2026-05-07", price: 715, avg_price: 818.2, savings_pct: 12.6, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Roatan+Honduras+from+Seattle+on+2026-05-02+through+2026-05-07" },
+    { destination: "Athens", dest_code: "ATH", region: "Europe", date: "2026-04-19", return_date: "2026-04-24", price: 720, avg_price: 1077.7, savings_pct: 33.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Athens+from+Seattle+on+2026-04-19+through+2026-04-24" },
+    { destination: "Istanbul", dest_code: "IST", region: "Europe", date: "2026-04-29", return_date: "2026-05-04", price: 723, avg_price: 1043.2, savings_pct: 30.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Istanbul+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Rome", dest_code: "FCO", region: "Europe", date: "2026-05-03", return_date: "2026-05-08", price: 730, avg_price: 1023.5, savings_pct: 28.7, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Rome+from+Seattle+on+2026-05-03+through+2026-05-08" },
+    { destination: "London", dest_code: "LHR", region: "Europe", date: "2026-04-16", return_date: "2026-04-21", price: 740, avg_price: 994.0, savings_pct: 25.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+London+from+Seattle+on+2026-04-16+through+2026-04-21" },
+    { destination: "Sao Paulo", dest_code: "GRU", region: "South America", date: "2026-06-23", return_date: "2026-06-28", price: 769, avg_price: 1047.4, savings_pct: 26.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Sao+Paulo+from+Seattle+on+2026-06-23+through+2026-06-28" },
+    { destination: "Taipei", dest_code: "TPE", region: "Asia", date: "2026-04-17", return_date: "2026-04-22", price: 771, avg_price: 1018.0, savings_pct: 24.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Taipei+from+Seattle+on+2026-04-17+through+2026-04-22" },
+    { destination: "Dublin", dest_code: "DUB", region: "Europe", date: "2026-04-29", return_date: "2026-05-04", price: 775, avg_price: 1046.0, savings_pct: 25.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Dublin+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Tokyo Narita", dest_code: "NRT", region: "Asia", date: "2026-04-30", return_date: "2026-05-05", price: 790, avg_price: 1087.2, savings_pct: 27.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Tokyo+Narita+from+Seattle+on+2026-04-30+through+2026-05-05" },
+    { destination: "Tokyo Haneda", dest_code: "HND", region: "Asia", date: "2026-04-29", return_date: "2026-05-04", price: 804, avg_price: 1153.6, savings_pct: 30.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Tokyo+Haneda+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Fiji (Nadi)", dest_code: "NAN", region: "Oceania", date: "2026-05-08", return_date: "2026-05-13", price: 807, avg_price: 1012.4, savings_pct: 20.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Fiji+(Nadi)+from+Seattle+on+2026-05-08+through+2026-05-13" },
+    { destination: "Auckland", dest_code: "AKL", region: "Oceania", date: "2026-05-19", return_date: "2026-05-24", price: 855, avg_price: 1214.1, savings_pct: 29.6, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Auckland+from+Seattle+on+2026-05-19+through+2026-05-24" },
+    { destination: "Lima", dest_code: "LIM", region: "South America", date: "2026-04-15", return_date: "2026-04-20", price: 863, avg_price: 1008.4, savings_pct: 14.4, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Lima+from+Seattle+on+2026-04-15+through+2026-04-20" },
+    { destination: "Ho Chi Minh City", dest_code: "SGN", region: "Asia", date: "2026-05-07", return_date: "2026-05-12", price: 872, avg_price: 1182.3, savings_pct: 26.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Ho+Chi+Minh+City+from+Seattle+on+2026-05-07+through+2026-05-12" },
+    { destination: "Hanoi", dest_code: "HAN", region: "Asia", date: "2026-05-04", return_date: "2026-05-09", price: 879, avg_price: 1194.4, savings_pct: 26.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Hanoi+from+Seattle+on+2026-05-04+through+2026-05-09" },
+    { destination: "Delhi", dest_code: "DEL", region: "Asia", date: "2026-06-03", return_date: "2026-06-08", price: 892, avg_price: 1148.2, savings_pct: 22.3, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Delhi+from+Seattle+on+2026-06-03+through+2026-06-08" },
+    { destination: "Manila", dest_code: "MNL", region: "Asia", date: "2026-04-29", return_date: "2026-05-04", price: 895, avg_price: 1170.3, savings_pct: 23.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Manila+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Amsterdam", dest_code: "AMS", region: "Europe", date: "2026-04-23", return_date: "2026-04-28", price: 903, avg_price: 1136.2, savings_pct: 20.5, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Amsterdam+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Bangkok", dest_code: "BKK", region: "Asia", date: "2026-04-29", return_date: "2026-05-04", price: 915, avg_price: 1205.3, savings_pct: 24.1, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Bangkok+from+Seattle+on+2026-04-29+through+2026-05-04" },
+    { destination: "Nairobi", dest_code: "NBO", region: "Africa", date: "2026-05-06", return_date: "2026-05-11", price: 939, avg_price: 1292.8, savings_pct: 27.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Nairobi+from+Seattle+on+2026-05-06+through+2026-05-11" },
+    { destination: "Seoul", dest_code: "ICN", region: "Asia", date: "2026-05-14", return_date: "2026-05-19", price: 949, avg_price: 1261.3, savings_pct: 24.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Seoul+from+Seattle+on+2026-05-14+through+2026-05-19" },
+    { destination: "Kuala Lumpur", dest_code: "KUL", region: "Asia", date: "2026-04-23", return_date: "2026-04-28", price: 1033, avg_price: 1263.1, savings_pct: 18.2, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Kuala+Lumpur+from+Seattle+on+2026-04-23+through+2026-04-28" },
+    { destination: "Rio de Janeiro", dest_code: "GIG", region: "South America", date: "2026-06-04", return_date: "2026-06-09", price: 1056, avg_price: 1304.2, savings_pct: 19.0, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Rio+de+Janeiro+from+Seattle+on+2026-06-04+through+2026-06-09" },
+    { destination: "Sydney", dest_code: "SYD", region: "Oceania", date: "2026-05-21", return_date: "2026-05-26", price: 1061, avg_price: 1146.1, savings_pct: 7.4, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Sydney+from+Seattle+on+2026-05-21+through+2026-05-26" },
+    { destination: "Bali", dest_code: "DPS", region: "Asia", date: "2026-04-26", return_date: "2026-05-01", price: 1098, avg_price: 1407.9, savings_pct: 22.0, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Bali+from+Seattle+on+2026-04-26+through+2026-05-01" },
+    { destination: "Santiago", dest_code: "SCL", region: "South America", date: "2026-05-05", return_date: "2026-05-10", price: 1155, avg_price: 1283.6, savings_pct: 10.0, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Santiago+from+Seattle+on+2026-05-05+through+2026-05-10" },
+    { destination: "Johannesburg", dest_code: "JNB", region: "Africa", date: "2026-05-13", return_date: "2026-05-18", price: 1201, avg_price: 1687.6, savings_pct: 28.8, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Johannesburg+from+Seattle+on+2026-05-13+through+2026-05-18" },
+    { destination: "Buenos Aires", dest_code: "EZE", region: "South America", date: "2026-04-22", return_date: "2026-04-27", price: 1280, avg_price: 1416.8, savings_pct: 9.7, is_deal: false, url: "https://www.google.com/travel/flights?q=Flights+to+Buenos+Aires+from+Seattle+on+2026-04-22+through+2026-04-27" },
+    { destination: "Accra", dest_code: "ACC", region: "Africa", date: "2026-04-26", return_date: "2026-05-01", price: 1302, avg_price: 1793.2, savings_pct: 27.4, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Accra+from+Seattle+on+2026-04-26+through+2026-05-01" },
+    { destination: "Dar es Salaam", dest_code: "DAR", region: "Africa", date: "2026-05-07", return_date: "2026-05-12", price: 1305, avg_price: 1655.5, savings_pct: 21.2, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Dar+es+Salaam+from+Seattle+on+2026-05-07+through+2026-05-12" },
+    { destination: "Cape Town", dest_code: "CPT", region: "Africa", date: "2026-05-13", return_date: "2026-05-18", price: 1308, avg_price: 1766.0, savings_pct: 25.9, is_deal: true, url: "https://www.google.com/travel/flights?q=Flights+to+Cape+Town+from+Seattle+on+2026-05-13+through+2026-05-18" }
+  ]
+};
+
+// ─── Kiwi Enrichment Data (nonstop, duration, booking links) ──────────────
+// has_nonstop: true if direct flight exists from SEA
+// nonstop_price: price for nonstop option (may differ from cheapest)
+// duration: outbound flight time for fastest option
+// kiwi_url: bookable Kiwi deep link for cheapest option
+// kiwi_price: cheapest Kiwi price found
+const KIWI = {
+  LAX: { has_nonstop: true, nonstop_price: 77, duration: "2h48m", kiwi_url: "https://on.kiwi.com/C3OxSH", kiwi_price: 77 },
+  SAN: { has_nonstop: true, duration: "3h00m" },
+  ORD: { has_nonstop: true, duration: "4h10m" },
+  LIH: { has_nonstop: true, duration: "5h50m" },
+  KOA: { has_nonstop: true, duration: "5h50m" },
+  HNL: { has_nonstop: true, nonstop_price: 547, duration: "6h16m", kiwi_url: "https://on.kiwi.com/9SIswq", kiwi_price: 422 },
+  OGG: { has_nonstop: true, duration: "5h40m" },
+  FAI: { has_nonstop: true, duration: "3h25m" },
+  CUN: { has_nonstop: true, nonstop_price: 446, duration: "5h50m", kiwi_url: "https://on.kiwi.com/MvvawC", kiwi_price: 442 },
+  MEX: { has_nonstop: false, duration: "5h45m" },
+  PVR: { has_nonstop: true, duration: "4h30m" },
+  SJD: { has_nonstop: true, duration: "3h45m" },
+  GDL: { has_nonstop: false, duration: "8h+" },
+  SJO: { has_nonstop: true, duration: "6h30m" },
+  PTY: { has_nonstop: false, duration: "9h+" },
+  BZE: { has_nonstop: false, duration: "8h+" },
+  LIR: { has_nonstop: true, duration: "6h15m" },
+  RTB: { has_nonstop: false, duration: "10h+" },
+  NRT: { has_nonstop: true, nonstop_price: 924, duration: "10h30m", kiwi_url: "https://on.kiwi.com/2BptTz", kiwi_price: 835 },
+  HND: { has_nonstop: true, duration: "10h15m" },
+  BKK: { has_nonstop: false, duration: "18h+" },
+  DPS: { has_nonstop: false, duration: "18h+" },
+  ICN: { has_nonstop: true, duration: "10h45m" },
+  TPE: { has_nonstop: true, duration: "11h00m" },
+  MNL: { has_nonstop: false, duration: "14h+" },
+  SGN: { has_nonstop: false, duration: "18h+" },
+  HAN: { has_nonstop: false, duration: "18h+" },
+  DEL: { has_nonstop: false, duration: "18h+" },
+  KUL: { has_nonstop: false, duration: "18h+" },
+  SIN: { has_nonstop: true, duration: "14h30m" },
+  LHR: { has_nonstop: true, nonstop_price: 1100, duration: "9h50m", kiwi_url: "https://on.kiwi.com/uy7mFH", kiwi_price: 789 },
+  CDG: { has_nonstop: false, duration: "13h10m", kiwi_url: "https://on.kiwi.com/f1MXUF", kiwi_price: 709 },
+  LIS: { has_nonstop: false, duration: "14h+" },
+  BCN: { has_nonstop: false, duration: "14h+" },
+  FCO: { has_nonstop: true, duration: "11h30m" },
+  AMS: { has_nonstop: true, duration: "9h45m" },
+  CPH: { has_nonstop: false, duration: "12h+" },
+  IST: { has_nonstop: true, duration: "12h00m" },
+  ATH: { has_nonstop: false, duration: "14h+" },
+  PRG: { has_nonstop: false, duration: "13h+" },
+  DUB: { has_nonstop: true, duration: "9h30m" },
+  KEF: { has_nonstop: true, duration: "7h25m" },
+  SJU: { has_nonstop: false, duration: "10h+" },
+  PUJ: { has_nonstop: false, duration: "11h+" },
+  SDQ: { has_nonstop: false, duration: "11h+" },
+  MBJ: { has_nonstop: false, duration: "10h+" },
+  NAS: { has_nonstop: false, duration: "11h+" },
+  AUA: { has_nonstop: false, duration: "11h+" },
+  CUR: { has_nonstop: false, duration: "12h+" },
+  STT: { has_nonstop: false, duration: "11h+" },
+  GCM: { has_nonstop: false, duration: "10h+" },
+  BGI: { has_nonstop: false, duration: "12h+" },
+  POS: { has_nonstop: false, duration: "13h+" },
+  BOG: { has_nonstop: false, duration: "9h+" },
+  MDE: { has_nonstop: false, duration: "10h+" },
+  LIM: { has_nonstop: false, duration: "10h+" },
+  SCL: { has_nonstop: false, duration: "14h+" },
+  GRU: { has_nonstop: false, duration: "16h+" },
+  EZE: { has_nonstop: false, duration: "16h+" },
+  GIG: { has_nonstop: false, duration: "16h+" },
+  CTG: { has_nonstop: false, duration: "9h+" },
+  UIO: { has_nonstop: false, duration: "10h+" },
+  NBO: { has_nonstop: false, duration: "20h+" },
+  CPT: { has_nonstop: false, duration: "22h+" },
+  JNB: { has_nonstop: false, duration: "20h+" },
+  CMN: { has_nonstop: false, duration: "16h+" },
+  CAI: { has_nonstop: false, duration: "18h+" },
+  ACC: { has_nonstop: false, duration: "20h+" },
+  DAR: { has_nonstop: false, duration: "22h+" },
+  SYD: { has_nonstop: false, duration: "16h+" },
+  AKL: { has_nonstop: true, duration: "13h00m" },
+  NAN: { has_nonstop: true, duration: "10h30m" }
+};
+
+// Enrich SCAN_DATA with Kiwi info
+SCAN_DATA.results.forEach(r => {
+  const k = KIWI[r.dest_code];
+  if (k) {
+    r.has_nonstop = k.has_nonstop || false;
+    r.nonstop_price = k.nonstop_price || null;
+    r.duration = k.duration || null;
+    r.kiwi_url = k.kiwi_url || null;
+    r.kiwi_price = k.kiwi_price || null;
+  }
+});
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const regionEmoji = {"Asia":"🌏","Europe":"🌍","Caribbean":"🏖️","South America":"🌎","Central America & Mexico":"🇲🇽","Africa":"🌍","Oceania":"🏝️","North America":"🇺🇸"};
+const REGIONS = ["All","Asia","Europe","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
+
+function fmtDate(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+}
+function fmtDateRange(dep, ret) {
+  const d = new Date(dep + "T00:00:00");
+  const r = new Date(ret + "T00:00:00");
+  if (d.getMonth() === r.getMonth()) return `${MONTHS[d.getMonth()]} ${d.getDate()} – ${r.getDate()}`;
+  return `${MONTHS[d.getMonth()]} ${d.getDate()} – ${MONTHS[r.getMonth()]} ${r.getDate()}`;
+}
+
+// ─── State ──────────────────────────────────────────────────────────────
+let activeRegion = "All";
+let sortBy = "price";
+let expandedCard = null;
+let nonstopOnly = false;
+
+// ─── Render ─────────────────────────────────────────────────────────────
+function init() {
+  const results = SCAN_DATA.results;
+  const deals = results.filter(r => r.is_deal);
+  const cheapest = results.reduce((m, r) => r.price < m.price ? r : m, results[0]);
+
+  const nonstops = results.filter(r => r.has_nonstop);
+  document.getElementById("statRoutes").textContent = results.length;
+  document.getElementById("statDeals").textContent = deals.length;
+  document.getElementById("statCheapest").textContent = "$" + cheapest.price;
+  document.getElementById("statNonstop").textContent = nonstops.length;
+
+  renderContinentSummary();
+  renderSavingsChart();
+  populateDestDropdowns();
+  renderFilters();
+  renderCards();
+}
+
+function renderContinentSummary() {
+  const grid = document.getElementById("continentGrid");
+  const continents = ["Asia","Europe","Caribbean","South America","Central America & Mexico","Africa","Oceania","North America"];
+  grid.innerHTML = continents.map(c => {
+    const cr = SCAN_DATA.results.filter(r => r.region === c).sort((a,b) => a.price - b.price);
+    if (!cr.length) return "";
+    const best = cr[0];
+    return `<a href="${best.url}" target="_blank" rel="noopener" class="continent-card">
+      <div class="continent-left">
+        <span class="continent-emoji">${regionEmoji[c]||"✈️"}</span>
+        <div>
+          <div class="continent-name">${c}</div>
+          <div class="continent-dest">${best.destination}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="continent-price">$${best.price}</div>
+        <div class="continent-dates">${fmtDateRange(best.date, best.return_date)}</div>
+      </div>
+    </a>`;
+  }).join("");
+}
+
+function renderSavingsChart() {
+  const top = [...SCAN_DATA.results].sort((a,b) => (b.savings_pct||0) - (a.savings_pct||0)).slice(0, 12);
+  const maxPct = Math.max(...top.map(t => t.savings_pct || 0));
+  document.getElementById("savingsChart").innerHTML = top.map(t => {
+    const w = ((t.savings_pct || 0) / maxPct * 100);
+    const cls = t.savings_pct >= 30 ? "hot" : t.savings_pct >= 20 ? "deal" : "ok";
+    return `<div class="savings-bar">
+      <div class="savings-label">${t.destination}</div>
+      <div class="savings-track">
+        <div class="savings-fill ${cls}" style="width:${w}%">${t.savings_pct.toFixed(0)}%</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderFilters() {
+  const container = document.getElementById("filters");
+  container.innerHTML = REGIONS.map(r =>
+    `<button class="filter-btn ${activeRegion === r ? 'active' : ''}" onclick="setRegion('${r}')">${r === "All" ? "All" : (regionEmoji[r]||"") + " " + r}</button>`
+  ).join("") +
+  `<button class="nonstop-toggle ${nonstopOnly ? 'active' : ''}" onclick="toggleNonstop()">✈ Nonstop Only</button>` +
+  `<select class="sort-select" onchange="setSort(this.value)">
+    <option value="price" ${sortBy==="price"?"selected":""}>Price (Low → High)</option>
+    <option value="savings" ${sortBy==="savings"?"selected":""}>Biggest Savings %</option>
+    <option value="date" ${sortBy==="date"?"selected":""}>Soonest Departure</option>
+    <option value="duration" ${sortBy==="duration"?"selected":""}>Shortest Flight</option>
+  </select>`;
+}
+
+function parseDuration(d) {
+  if (!d) return 999;
+  const match = d.match(/(\d+)h/);
+  return match ? parseInt(match[1]) : 999;
+}
+
+function renderCards() {
+  let items = [...SCAN_DATA.results];
+  if (activeRegion !== "All") items = items.filter(r => r.region === activeRegion);
+  if (nonstopOnly) items = items.filter(r => r.has_nonstop);
+  if (sortBy === "price") items.sort((a,b) => a.price - b.price);
+  else if (sortBy === "savings") items.sort((a,b) => (b.savings_pct||0) - (a.savings_pct||0));
+  else if (sortBy === "date") items.sort((a,b) => a.date.localeCompare(b.date));
+  else if (sortBy === "duration") items.sort((a,b) => parseDuration(a.duration) - parseDuration(b.duration));
+
+  document.getElementById("flightCards").innerHTML = items.map(f => {
+    const isExpanded = expandedCard === f.dest_code;
+    const savingsClass = f.savings_pct >= 30 ? "hot" : f.savings_pct >= 20 ? "deal" : "normal";
+    const badges = [];
+    if (f.savings_pct >= 30) badges.push('<span class="badge badge-hot">HOT DEAL</span>');
+    else if (f.is_deal) badges.push('<span class="badge badge-deal">DEAL</span>');
+    if (f.has_nonstop) badges.push('<span class="badge badge-nonstop">NONSTOP</span>');
+    if (f.positioning) badges.push(`<span class="badge badge-positioning">via ${f.positioning.hub} saves $${f.positioning.save}</span>`);
+
+    const durationTag = f.duration ? `<span class="flight-duration">⏱ ${f.duration}</span>` : "";
+    const nonstopTag = f.has_nonstop && f.nonstop_price && f.nonstop_price !== f.price ? `<span class="flight-nonstop">nonstop from $${f.nonstop_price}</span>` : "";
+
+    let expanded = "";
+    if (isExpanded) {
+      let kiwiBtn = "";
+      if (f.kiwi_url) {
+        kiwiBtn = `<a href="${f.kiwi_url}" target="_blank" rel="noopener" class="book-btn book-btn-kiwi" style="margin-left:8px;">↗ Book on Kiwi${f.kiwi_price ? " ($" + f.kiwi_price + ")" : ""}</a>`;
+      }
+      expanded = `<div class="flight-expanded show">
+        <a href="${f.url}" target="_blank" rel="noopener" class="book-btn">↗ Book on Google Flights</a>
+        ${kiwiBtn}
+        ${f.positioning ? `<span class="positioning-info">🔀 Via ${f.positioning.hub}: $${f.positioning.total} total (save $${f.positioning.save} vs direct)</span>` : ""}
+        ${f.has_nonstop ? `<div style="margin-top:8px;font-size:12px;color:#059669;">✈ Direct flights available from SEA${f.nonstop_price ? " (nonstop from $" + f.nonstop_price + ")" : ""}</div>` : '<div style="margin-top:8px;font-size:12px;color:#9ca3af;">⤴ Requires connection (no nonstop from SEA)</div>'}
+        ${f.duration ? `<div style="margin-top:4px;font-size:12px;color:#0369a1;">⏱ Fastest outbound: ~${f.duration}</div>` : ""}
+      </div>`;
+    }
+
+    return `<div class="flight-card">
+      <div class="flight-row" onclick="toggleCard('${f.dest_code}')">
+        <div class="flight-left">
+          <span class="flight-emoji">${regionEmoji[f.region]||"✈️"}</span>
+          <div>
+            <span class="flight-dest">${f.destination}</span><span class="flight-code">${f.dest_code}</span>
+            ${badges.join("")}
+            <div class="flight-meta">📅 ${fmtDateRange(f.date, f.return_date)}  ·  ${f.region} ${durationTag} ${nonstopTag}</div>
+          </div>
+        </div>
+        <div class="flight-right">
+          <div>
+            <div class="flight-price">$${f.price}</div>
+            <div class="flight-savings ${savingsClass}">${f.savings_pct > 0 ? f.savings_pct.toFixed(0) + "% below avg" : ""}</div>
+            ${f.avg_price ? `<div class="flight-avg">$${f.avg_price}</div>` : ""}
+          </div>
+          <span class="flight-chevron ${isExpanded ? 'open' : ''}">▾</span>
+        </div>
+      </div>
+      ${expanded}
+    </div>`;
+  }).join("");
+}
+
+function setRegion(r) { activeRegion = r; renderFilters(); renderCards(); }
+function setSort(s) { sortBy = s; renderCards(); }
+function toggleCard(code) { expandedCard = expandedCard === code ? null : code; renderCards(); }
+function toggleNonstop() { nonstopOnly = !nonstopOnly; renderFilters(); renderCards(); }
+
+// ─── All Destinations for dropdowns ──────────────────────────────────────
+const ALL_DESTS = {
+  "Asia": { NRT: "Tokyo Narita", HND: "Tokyo Haneda", BKK: "Bangkok", DPS: "Bali", ICN: "Seoul", TPE: "Taipei", MNL: "Manila", SGN: "Ho Chi Minh City", HAN: "Hanoi", DEL: "Delhi", KUL: "Kuala Lumpur", SIN: "Singapore" },
+  "Europe": { LIS: "Lisbon", BCN: "Barcelona", CDG: "Paris", FCO: "Rome", LHR: "London", AMS: "Amsterdam", CPH: "Copenhagen", IST: "Istanbul", ATH: "Athens", PRG: "Prague", DUB: "Dublin", KEF: "Reykjavik Iceland" },
+  "Caribbean": { SJU: "San Juan Puerto Rico", PUJ: "Punta Cana", SDQ: "Santo Domingo", CUN: "Cancun", MBJ: "Montego Bay Jamaica", NAS: "Nassau Bahamas", AUA: "Aruba", CUR: "Curacao", STT: "St Thomas USVI", GCM: "Grand Cayman", BGI: "Barbados", POS: "Trinidad" },
+  "South America": { BOG: "Bogota", MDE: "Medellin", LIM: "Lima", SCL: "Santiago", GRU: "Sao Paulo", EZE: "Buenos Aires", GIG: "Rio de Janeiro", CTG: "Cartagena", UIO: "Quito" },
+  "Central America & Mexico": { MEX: "Mexico City", PVR: "Puerto Vallarta", SJD: "Cabo San Lucas", GDL: "Guadalajara", SJO: "San Jose CR", LIR: "Liberia Costa Rica", PTY: "Panama City", BZE: "Belize City", RTB: "Roatan Honduras" },
+  "Africa": { NBO: "Nairobi", CPT: "Cape Town", JNB: "Johannesburg", CMN: "Casablanca", CAI: "Cairo", ACC: "Accra", DAR: "Dar es Salaam" },
+  "Oceania": { SYD: "Sydney", AKL: "Auckland", NAN: "Fiji (Nadi)" },
+  "North America": { FAI: "Fairbanks", LAX: "Los Angeles", SAN: "San Diego", HNL: "Oahu (Honolulu)", OGG: "Maui (Kahului)", LIH: "Kauai (Lihue)", KOA: "Big Island (Kona)", ORD: "Chicago" }
+};
+
+function populateDestDropdowns() {
+  const selects = [document.getElementById("drDest"), document.getElementById("mcDest")];
+  selects.forEach(sel => {
+    if (!sel) return;
+    sel.innerHTML = "";
+    for (const [region, dests] of Object.entries(ALL_DESTS)) {
+      const group = document.createElement("optgroup");
+      group.label = region;
+      for (const [code, name] of Object.entries(dests)) {
+        const opt = document.createElement("option");
+        opt.value = code;
+        opt.textContent = `${name} (${code})`;
+        opt.dataset.name = name;
+        group.appendChild(opt);
+      }
+      sel.appendChild(group);
+    }
+  });
+  // Set default dates
+  const now = new Date();
+  const in2w = new Date(now.getTime() + 14 * 86400000);
+  const in4m = new Date(now.getTime() + 120 * 86400000);
+  const fmt = d => d.toISOString().split("T")[0];
+  document.getElementById("drFrom").value = fmt(in2w);
+  document.getElementById("drTo").value = fmt(in4m);
+  document.getElementById("mcFrom").value = fmt(in2w);
+  document.getElementById("mcTo").value = fmt(in4m);
+}
+
+// ─── Date Range Search ──────────────────────────────────────────────────
+// ─── Time Off Deals ──────────────────────────────────────────────────────
+let timeOffWindows = [];
+
+function addTimeOff() {
+  const from = document.getElementById("toFrom").value;
+  const to = document.getElementById("toTo").value;
+  if (!from || !to) { alert("Please pick both a start and end date."); return; }
+  if (new Date(to) <= new Date(from)) { alert("End date must be after start date."); return; }
+  if (timeOffWindows.find(w => w.from === from && w.to === to)) { alert("Already added!"); return; }
+  timeOffWindows.push({ from, to });
+  timeOffWindows.sort((a, b) => a.from.localeCompare(b.from));
+  renderTimeOffTags();
+  document.getElementById("toFrom").value = "";
+  document.getElementById("toTo").value = "";
+  document.getElementById("toResults").innerHTML = "";
+}
+
+function removeTimeOff(idx) {
+  timeOffWindows.splice(idx, 1);
+  renderTimeOffTags();
+  document.getElementById("toResults").innerHTML = "";
+}
+
+function renderTimeOffTags() {
+  document.getElementById("toTags").innerHTML = timeOffWindows.map((w, i) =>
+    `<span class="timeoff-tag">📅 ${fmtShortDate(w.from)} – ${fmtShortDate(w.to)} <button onclick="removeTimeOff(${i})">&times;</button></span>`
+  ).join("");
+}
+
+function fmtShortDate(d) {
+  const dt = new Date(d + "T12:00:00");
+  return dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function searchTimeOff() {
+  if (timeOffWindows.length === 0) { alert("Add at least one time-off window first."); return; }
+
+  const btn = document.getElementById("toSearchBtn");
+  const resultsEl = document.getElementById("toResults");
+  btn.disabled = true;
+  btn.textContent = "Searching...";
+
+  const regionEmoji = { "North America": "🌎", "Europe": "🇪🇺", "Asia": "🌏", "Caribbean": "🏝️", "Central America & Mexico": "🌮", "South America": "🌎", "Africa": "🌍", "Oceania": "🌊" };
+
+  let html = "";
+
+  timeOffWindows.forEach(window => {
+    const wFrom = new Date(window.from + "T00:00:00");
+    const wTo = new Date(window.to + "T23:59:59");
+    const windowDays = Math.round((wTo - wFrom) / (1000 * 60 * 60 * 24));
+
+    // Find all flights whose travel dates overlap with this time-off window
+    const matches = SCAN_DATA.results.filter(r => {
+      const depDate = new Date(r.date + "T00:00:00");
+      const retDate = new Date(r.return_date + "T23:59:59");
+      // Flight departs on or after window start AND returns on or before window end
+      return depDate >= wFrom && retDate <= wTo;
+    }).sort((a, b) => a.price - b.price);
+
+    // Also find "near matches" — flights that partially overlap
+    const nearMatches = SCAN_DATA.results.filter(r => {
+      const depDate = new Date(r.date + "T00:00:00");
+      const retDate = new Date(r.return_date + "T23:59:59");
+      // Overlaps but doesn't fit perfectly
+      return depDate <= wTo && retDate >= wFrom && !(depDate >= wFrom && retDate <= wTo);
+    }).sort((a, b) => a.price - b.price).slice(0, 5);
+
+    html += `<div class="timeoff-result-block">
+      <h4>📅 ${fmtShortDate(window.from)} – ${fmtShortDate(window.to)} (${windowDays} days)</h4>`;
+
+    if (matches.length > 0) {
+      html += `<div style="font-size:12px;color:#059669;font-weight:600;margin-bottom:8px;">✅ ${matches.length} destination${matches.length > 1 ? 's' : ''} fit perfectly within your time off:</div>`;
+      matches.slice(0, 10).forEach((r, i) => {
+        const emoji = regionEmoji[r.region] || "✈️";
+        const savings = r.savings_pct ? `${Math.round(r.savings_pct)}% off avg` : "";
+        const nonstop = r.kiwi_nonstop ? ' <span style="color:#059669;font-size:10px;font-weight:600;">✈ NONSTOP</span>' : "";
+        html += `<div class="timeoff-dest">
+          <div class="timeoff-dest-left">
+            <span class="timeoff-dest-emoji">${i === 0 ? "🏆" : emoji}</span>
+            <div>
+              <div class="timeoff-dest-name">${r.destination}${nonstop}</div>
+              <div class="timeoff-dest-meta">${fmtDateRange(r.date, r.return_date)} · ${r.region}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="timeoff-dest-price">$${r.price}</div>
+            ${savings ? `<div class="timeoff-dest-savings">${savings}</div>` : ""}
+            <a href="${r.url}" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;">Book →</a>
+          </div>
+        </div>`;
+      });
+    } else {
+      html += `<div class="timeoff-no-results">No exact-fit flights in the scan for this window.</div>`;
+    }
+
+    if (nearMatches.length > 0) {
+      html += `<details style="margin-top:10px;"><summary style="font-size:12px;color:#6b7280;cursor:pointer;font-weight:600;">📌 ${nearMatches.length} near-match${nearMatches.length > 1 ? 'es' : ''} (overlap but extend beyond your time off)</summary>`;
+      nearMatches.forEach(r => {
+        const emoji = regionEmoji[r.region] || "✈️";
+        html += `<div class="timeoff-dest" style="padding:6px 0;">
+          <div class="timeoff-dest-left">
+            <span class="timeoff-dest-emoji">${emoji}</span>
+            <div>
+              <div class="timeoff-dest-name" style="font-size:13px;">${r.destination}</div>
+              <div class="timeoff-dest-meta">${fmtDateRange(r.date, r.return_date)}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:16px;font-weight:700;color:#059669;">$${r.price}</div>
+            <a href="${r.url}" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;">Book →</a>
+          </div>
+        </div>`;
+      });
+      html += `</details>`;
+    }
+
+    // Always show a Google Flights link for manual search
+    html += `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #d1fae5;">
+      <a href="https://www.google.com/travel/flights?q=Flights+from+Seattle+on+${window.from}+through+${window.to}" target="_blank" rel="noopener" class="book-btn" style="display:inline-flex;font-size:12px;padding:6px 12px;">🔍 Search all destinations on Google Flights</a>
+    </div>`;
+
+    html += `</div>`;
+  });
+
+  resultsEl.innerHTML = html;
+  btn.disabled = false;
+  btn.textContent = "Find Cheapest Destinations";
+}
+
+// ─── Multi-City Planner ──────────────────────────────────────────────────
+let mcCities = [];
+
+function addMcCity() {
+  const sel = document.getElementById("mcDest");
+  const code = sel.value;
+  const name = sel.options[sel.selectedIndex].dataset.name;
+
+  if (mcCities.find(c => c.code === code)) { alert("Already added!"); return; }
+  if (mcCities.length >= 4) { alert("Max 4 cities (to keep search fast)."); return; }
+
+  mcCities.push({ code, name });
+  renderMcTags();
+}
+
+function removeMcCity(code) {
+  mcCities = mcCities.filter(c => c.code !== code);
+  renderMcTags();
+}
+
+function renderMcTags() {
+  document.getElementById("mcTags").innerHTML = mcCities.map(c =>
+    `<span class="mc-tag">${c.name} (${c.code}) <button onclick="removeMcCity('${c.code}')">&times;</button></span>`
+  ).join("");
+}
+
+function searchMultiCity() {
+  if (mcCities.length < 2) { alert("Add at least 2 cities."); return; }
+
+  const from = document.getElementById("mcFrom").value;
+  const to = document.getElementById("mcTo").value;
+  const daysPerStop = parseInt(document.getElementById("mcDays").value) || 3;
+
+  const btn = document.getElementById("mcSearchBtn");
+  const results = document.getElementById("mcResults");
+  btn.disabled = true;
+  btn.textContent = "Optimizing...";
+  results.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;"><span class="tool-spinner"></span> Finding the cheapest multi-city combination...</div>';
+
+  // Build the command and quick estimate from existing data
+  const cityArgs = mcCities.map(c => `${c.code}:"${c.name}"`).join(" ");
+  const routeStr = `SEA → ${mcCities.map(c => c.name).join(" → ")} → SEA`;
+
+  // Quick estimate using existing scan data
+  let estimateHtml = "";
+  let estimateTotal = 0;
+  let hasAllPrices = true;
+  const legPairs = [
+    { from: "SEA", to: mcCities[0].code, name: mcCities[0].name },
+    ...mcCities.slice(0, -1).map((c, i) => ({ from: c.code, to: mcCities[i+1].code, name: mcCities[i+1].name })),
+    { from: mcCities[mcCities.length-1].code, to: "SEA", name: "Seattle" }
+  ];
+
+  estimateHtml += `<div class="mc-itinerary">
+    <h4>Route: ${routeStr}</h4>
+    <p style="font-size:12px;color:#6b7280;margin-bottom:8px;">Quick estimate from today's scan data (one-way prices approximated from round-trip ÷ 2):</p>`;
+
+  legPairs.forEach((leg, i) => {
+    const match = SCAN_DATA.results.find(r => r.dest_code === leg.to) || SCAN_DATA.results.find(r => r.dest_code === leg.from);
+    const estPrice = match ? Math.round(match.price / 2) : null;
+    if (estPrice) {
+      estimateTotal += estPrice;
+      estimateHtml += `<div class="mc-leg">Leg ${i+1}: ${leg.from} → ${leg.to} (${leg.name}) — <strong>~$${estPrice}</strong></div>`;
+    } else {
+      hasAllPrices = false;
+      estimateHtml += `<div class="mc-leg">Leg ${i+1}: ${leg.from} → ${leg.to} (${leg.name}) — <em>no data</em></div>`;
+    }
+  });
+
+  if (hasAllPrices) {
+    estimateHtml += `<div style="margin-top:8px;font-size:16px;font-weight:700;color:#059669;">Estimated Total: ~$${estimateTotal}</div>`;
+    // Compare to direct round-trips
+    const directTotal = mcCities.reduce((sum, c) => {
+      const match = SCAN_DATA.results.find(r => r.dest_code === c.code);
+      return sum + (match ? match.price : 0);
+    }, 0);
+    if (directTotal > 0) {
+      const savings = directTotal - estimateTotal;
+      estimateHtml += `<div style="font-size:12px;color:#6b7280;">vs. separate round-trips: $${directTotal} (${savings > 0 ? 'save' : 'costs'} $${Math.abs(savings)})</div>`;
+    }
+  }
+  estimateHtml += `</div>`;
+
+  let html = estimateHtml;
+  html += `<div style="padding:12px;background:#eff6ff;border-radius:8px;margin-top:12px;">
+    <strong>For exact pricing,</strong> run the optimizer:<br>
+    <code style="display:block;margin:8px 0;padding:8px;background:#1e293b;color:#e2e8f0;border-radius:6px;font-size:12px;overflow-x:auto;">python flight_scout.py --multicity ${cityArgs} --multicity-from ${from} --multicity-to ${to} --days-per-stop ${daysPerStop}</code>
+    <span style="font-size:12px;color:#6b7280;">This will search all one-way combos and find the cheapest dates + ordering.</span>
+  </div>`;
+
+  // Also give direct Google Flights links for each leg
+  html += `<div style="margin-top:12px;"><strong>Or search each leg manually:</strong></div>`;
+  legPairs.forEach((leg, i) => {
+    const fromName = leg.from === "SEA" ? "Seattle" : (mcCities.find(c => c.code === leg.from)?.name || leg.from);
+    const url = `https://www.google.com/travel/flights?q=Flights+to+${leg.name.replace(/ /g, '+')}+from+${fromName.replace(/ /g, '+')}+on+${from}`;
+    html += `<div style="padding:4px 0;"><a href="${url}" target="_blank" rel="noopener" style="font-size:13px;">Leg ${i+1}: ${leg.from} → ${leg.to} (${leg.name}) ↗</a></div>`;
+  });
+
+  results.innerHTML = html;
+  btn.disabled = false;
+  btn.textContent = "Find Cheapest Route";
+}
+
+function handleSignup() {
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  if (!name || !email || !email.includes("@")) { alert("Please enter your name and a valid email."); return; }
+  const subject = encodeURIComponent("Subscribe to SEA Flight Deals");
+  const body = encodeURIComponent("Please add me to the daily flight deals list.\n\nName: " + name + "\nEmail: " + email);
+  window.location.href = "mailto:upham51@gmail.com?subject=" + subject + "&body=" + body;
+  document.getElementById("signupForm").classList.add("hidden");
+  document.getElementById("signupSuccess").classList.add("show");
+}
+
+init();
+</script>
+</body>
+</html>
